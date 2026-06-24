@@ -40,8 +40,12 @@ export async function listCocktails(): Promise<CocktailSummary[]> {
 }
 
 export async function saveImage(id: string, bytes: Buffer): Promise<void> {
-  // Pass a clean ArrayBuffer slice — @netlify/blobs accepts ArrayBuffer/Blob/string.
-  const ab = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+  // Pass a clean, definitely-typed ArrayBuffer — @netlify/blobs rejects the
+  // ArrayBuffer | SharedArrayBuffer union that bytes.buffer is typed as.
+  const ab = bytes.buffer.slice(
+    bytes.byteOffset,
+    bytes.byteOffset + bytes.byteLength
+  ) as ArrayBuffer;
   await imageStore().set(id, ab);
 }
 
