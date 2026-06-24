@@ -16,6 +16,7 @@ const SUGGESTIONS = [
 export default function Generator() {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const [error, setError] = useState("");
   const [cocktail, setCocktail] = useState<Cocktail | null>(null);
 
@@ -26,6 +27,7 @@ export default function Generator() {
     setError("");
     setCocktail(null);
     try {
+      // Step 1: get the recipe (fast) and show it immediately.
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -34,9 +36,29 @@ export default function Generator() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Generation failed.");
       setCocktail(data);
+      setLoading(false);
+
+      // Step 2: generate the image separately so this never times out.
+      if (data.id && data.imagePrompt) {
+        setImageLoading(true);
+        try {
+          const imgRes = await fetch("/api/generate-image", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ id: data.id, imagePrompt: data.imagePrompt }),
+          });
+          const imgData = await imgRes.json();
+          if (imgRes.ok && imgData.imageUrl) {
+            setCocktail((prev) => (prev ? { ...prev, imageUrl: imgData.imageUrl } : prev));
+          }
+        } catch {
+          // Leave the placeholder if the image step fails; recipe still stands.
+        } finally {
+          setImageLoading(false);
+        }
+      }
     } catch (err: any) {
       setError(err?.message || "Something went wrong. Try again.");
-    } finally {
       setLoading(false);
     }
   }
@@ -100,7 +122,7 @@ export default function Generator() {
         </div>
       )}
 
-      {cocktail && <CocktailCard cocktail={cocktail} />}
+      {cocktail && <CocktailCard cocktail={cocktail} imageLoading={imageLoading} />}
     </>
   );
 }

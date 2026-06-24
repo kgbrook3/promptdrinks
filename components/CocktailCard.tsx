@@ -1,12 +1,23 @@
 import type { Cocktail } from "@/lib/types";
 
-export default function CocktailCard({ cocktail }: { cocktail: Cocktail }) {
+export default function CocktailCard({
+  cocktail,
+  imageLoading = false,
+}: {
+  cocktail: Cocktail;
+  imageLoading?: boolean;
+}) {
   return (
     <article className="cocktail">
       <div className="photo">
         {cocktail.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={cocktail.imageUrl} alt={cocktail.name} />
+        ) : imageLoading ? (
+          <div className="photo-loading">
+            <span className="shaker">🍸</span>
+            <p>Pouring your photo…</p>
+          </div>
         ) : (
           <span className="placeholder">🍸</span>
         )}

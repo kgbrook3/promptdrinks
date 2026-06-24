@@ -228,6 +228,17 @@ main {
   font-size: 64px;
   opacity: 0.5;
 }
+.cocktail .photo .photo-loading {
+  text-align: center;
+  color: var(--muted);
+}
+.cocktail .photo .photo-loading .shaker {
+  font-size: 48px;
+}
+.cocktail .photo .photo-loading p {
+  margin: 10px 0 0;
+  font-size: 13px;
+}
 .cocktail .body {
   padding: 30px;
 }

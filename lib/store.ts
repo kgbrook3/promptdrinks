@@ -20,6 +20,13 @@ export async function getCocktail(id: string): Promise<Cocktail | null> {
   return (await cocktailStore().get(id, { type: "json" })) as Cocktail | null;
 }
 
+export async function updateCocktailImage(id: string, imageUrl: string): Promise<void> {
+  const cocktail = await getCocktail(id);
+  if (!cocktail) return;
+  cocktail.imageUrl = imageUrl;
+  await cocktailStore().setJSON(id, cocktail);
+}
+
 export async function listCocktails(): Promise<CocktailSummary[]> {
   const store = cocktailStore();
   const { blobs } = await store.list();

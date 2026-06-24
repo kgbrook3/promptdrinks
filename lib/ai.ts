@@ -3,6 +3,8 @@
 const CLAUDE_MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-4-6";
 const IMAGE_MODEL = process.env.IMAGE_MODEL || "gpt-image-1";
 const IMAGE_SIZE = process.env.IMAGE_SIZE || "1024x1024";
+// "low" keeps gpt-image-1 fast enough to finish inside the serverless timeout.
+const IMAGE_QUALITY = process.env.IMAGE_QUALITY || "low";
 
 export interface GeneratedRecipe {
   name: string;
@@ -110,6 +112,9 @@ export async function generateImage(imagePrompt: string): Promise<Buffer> {
       prompt: `Professional, appetizing cocktail photography. ${imagePrompt}. Soft studio lighting, shallow depth of field, no text or watermarks.`,
       size: IMAGE_SIZE,
       n: 1,
+      // gpt-image-1 supports low|medium|high; dall-e-3 uses standard|hd, so only
+      // send quality for gpt-image-* to avoid an invalid-parameter error.
+      ...(IMAGE_MODEL.startsWith("gpt-image") ? { quality: IMAGE_QUALITY } : {}),
     }),
   });
 
