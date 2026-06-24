@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import type { Cocktail } from "@/lib/types";
 import CocktailCard from "./CocktailCard";
 
@@ -13,12 +14,32 @@ const SUGGESTIONS = [
   "late-night coding session",
 ];
 
+// Decorative rising bubbles for the hero (left %, size px, delay s, duration s).
+const BUBBLES = [
+  { left: 6, size: 16, delay: 0, dur: 9 },
+  { left: 18, size: 9, delay: 2.5, dur: 11 },
+  { left: 30, size: 22, delay: 1, dur: 8 },
+  { left: 42, size: 7, delay: 3.5, dur: 12 },
+  { left: 54, size: 13, delay: 0.6, dur: 10 },
+  { left: 66, size: 10, delay: 2, dur: 9.5 },
+  { left: 78, size: 18, delay: 1.4, dur: 8.5 },
+  { left: 90, size: 8, delay: 3, dur: 11.5 },
+];
+
 export default function Generator() {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
   const [error, setError] = useState("");
   const [cocktail, setCocktail] = useState<Cocktail | null>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
+
+  // Smoothly scroll to the result when a NEW drink appears (not on image update).
+  useEffect(() => {
+    if (cocktail) {
+      resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [cocktail?.id]);
 
   async function generate(value: string) {
     const text = value.trim();
@@ -66,6 +87,21 @@ export default function Generator() {
   return (
     <>
       <section className="hero">
+        <div className="bubbles" aria-hidden="true">
+          {BUBBLES.map((b, i) => (
+            <span
+              key={i}
+              className="bubble"
+              style={{
+                left: `${b.left}%`,
+                width: b.size,
+                height: b.size,
+                animationDelay: `${b.delay}s`,
+                animationDuration: `${b.dur}s`,
+              }}
+            />
+          ))}
+        </div>
         <h1>
           Type anything.
           <br />
@@ -122,7 +158,18 @@ export default function Generator() {
         </div>
       )}
 
-      {cocktail && <CocktailCard cocktail={cocktail} imageLoading={imageLoading} />}
+      <div ref={resultRef}>
+        {cocktail && (
+          <>
+            <CocktailCard cocktail={cocktail} imageLoading={imageLoading} />
+            <p className="permalink-row">
+              <Link className="permalink" href={`/drink/${cocktail.id}`}>
+                Open &amp; share this drink →
+              </Link>
+            </p>
+          </>
+        )}
+      </div>
     </>
   );
 }
