@@ -26,7 +26,7 @@ export default async function Home() {
           </div>
           <div className="grid">
             {recent.map((c) => (
-              <div className="tile" key={c.id}>
+              <Link className="tile" href={`/drink/${c.id}`} key={c.id}>
                 <div className="thumb">
                   {c.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -39,7 +39,7 @@ export default async function Home() {
                   <h3>{c.name}</h3>
                   <p>“{c.prompt}”</p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </>

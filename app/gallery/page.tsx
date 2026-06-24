@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { listCocktails } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +29,7 @@ export default async function Gallery() {
       ) : (
         <div className="grid">
           {cocktails.map((c) => (
-            <div className="tile" key={c.id}>
+            <Link className="tile" href={`/drink/${c.id}`} key={c.id}>
               <div className="thumb">
                 {c.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -41,7 +42,7 @@ export default async function Gallery() {
                 <h3>{c.name}</h3>
                 <p>“{c.prompt}”</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
