@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import type { Cocktail } from "@/lib/types";
 import CocktailCard from "./CocktailCard";
@@ -26,20 +27,90 @@ const BUBBLES = [
   { left: 90, size: 8, delay: 3, dur: 11.5 },
 ];
 
+// Phrases the input placeholder types out, one after another.
+const PLACEHOLDERS = [
+  "a rainy Sunday in Lisbon",
+  "the smell of an old bookshop",
+  "victory after a marathon",
+  "a haunted New Orleans jazz bar",
+  "the color teal",
+  "my grandmother's kitchen",
+  "a first-day-of-summer feeling",
+];
+
+// Pre-computed "cheers" sparkle burst particles (direction + glyph).
+const CHEERS_GLYPHS = ["✨", "✨", "🥂", "🍸", "✨", "🎉"];
+const CHEERS_PARTICLES = Array.from({ length: 16 }, (_, i) => {
+  const angle = (360 / 16) * i + (Math.random() * 18 - 9);
+  const dist = 70 + Math.random() * 55;
+  const rad = (angle * Math.PI) / 180;
+  return {
+    tx: Math.round(Math.cos(rad) * dist),
+    ty: Math.round(Math.sin(rad) * dist),
+    glyph: CHEERS_GLYPHS[i % CHEERS_GLYPHS.length],
+    delay: Math.random() * 0.08,
+  };
+});
+
 export default function Generator() {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
   const [error, setError] = useState("");
   const [cocktail, setCocktail] = useState<Cocktail | null>(null);
+  const [placeholder, setPlaceholder] = useState("Type anything…");
+  const [cheers, setCheers] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
 
-  // Smoothly scroll to the result when a NEW drink appears (not on image update).
+  // Smoothly scroll to the result + celebrate when a NEW drink appears.
   useEffect(() => {
-    if (cocktail) {
-      resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    if (!cocktail) return;
+    resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+    setCheers(true);
+    const t = setTimeout(() => setCheers(false), 1000);
+    return () => clearTimeout(t);
   }, [cocktail?.id]);
+
+  // Typewriter placeholder that cycles through example prompts while empty.
+  useEffect(() => {
+    if (prompt) return; // pause once the user starts typing
+    let phraseIdx = 0;
+    let charIdx = 0;
+    let deleting = false;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const tick = () => {
+      const phrase = PLACEHOLDERS[phraseIdx];
+      if (!deleting) {
+        charIdx++;
+        setPlaceholder(`Try: ${phrase.slice(0, charIdx)}`);
+        if (charIdx === phrase.length) {
+          deleting = true;
+          timer = setTimeout(tick, 1700);
+          return;
+        }
+        timer = setTimeout(tick, 55);
+      } else {
+        charIdx--;
+        setPlaceholder(`Try: ${phrase.slice(0, charIdx)}`);
+        if (charIdx === 0) {
+          deleting = false;
+          phraseIdx = (phraseIdx + 1) % PLACEHOLDERS.length;
+          timer = setTimeout(tick, 350);
+          return;
+        }
+        timer = setTimeout(tick, 28);
+      }
+    };
+
+    timer = setTimeout(tick, 700);
+    return () => clearTimeout(timer);
+  }, [prompt]);
 
   async function generate(value: string) {
     const text = value.trim();
@@ -86,6 +157,26 @@ export default function Generator() {
 
   return (
     <>
+      {cheers && (
+        <div className="cheers" aria-hidden="true">
+          {CHEERS_PARTICLES.map((p, i) => (
+            <span
+              key={i}
+              className="cheer"
+              style={
+                {
+                  "--tx": `${p.tx}px`,
+                  "--ty": `${p.ty}px`,
+                  animationDelay: `${p.delay}s`,
+                } as CSSProperties
+              }
+            >
+              {p.glyph}
+            </span>
+          ))}
+        </div>
+      )}
+
       <section className="hero">
         <div className="bubbles" aria-hidden="true">
           {BUBBLES.map((b, i) => (
@@ -123,7 +214,7 @@ export default function Generator() {
             type="text"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Type anything…"
+            placeholder={placeholder}
             disabled={loading}
             autoFocus
           />
