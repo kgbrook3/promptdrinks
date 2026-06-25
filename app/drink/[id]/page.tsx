@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import { getCocktail } from "@/lib/store";
 import CocktailCard from "@/components/CocktailCard";
 import ShareButtons from "@/components/ShareButtons";
+import CheersButton from "@/components/CheersButton";
+import ShareCard from "@/components/ShareCard";
 
 export const dynamic = "force-dynamic";
 
@@ -94,12 +96,23 @@ export default async function DrinkPage({ params }: { params: { id: string } }) 
         ← Back to gallery
       </Link>
       <CocktailCard cocktail={cocktail} />
+      <div className="cheers-row">
+        <CheersButton id={cocktail.id} initial={cocktail.cheers ?? 0} />
+      </div>
       <ShareButtons
         title={cocktail.name}
         text={shareText}
         imageUrl={cocktail.imageUrl || undefined}
         recipeText={recipeText}
       />
+      <div className="sharecard-row">
+        <ShareCard
+          name={cocktail.name}
+          tagline={cocktail.tagline}
+          imageUrl={cocktail.imageUrl || undefined}
+          mocktail={cocktail.mocktail}
+        />
+      </div>
     </div>
   );
 }

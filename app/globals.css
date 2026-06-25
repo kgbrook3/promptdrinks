@@ -273,6 +273,106 @@ main {
   }
 }
 
+.sharecard-row {
+  text-align: center;
+  margin: 4px 0 30px;
+}
+
+/* Cheers (likes) */
+.cheers-row {
+  max-width: 880px;
+  margin: 0 auto 6px;
+  text-align: center;
+}
+.cheers-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 11px 22px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.08s ease;
+}
+.cheers-btn:hover {
+  border-color: var(--accent-2);
+  transform: translateY(-1px);
+}
+.cheers-btn.cheered {
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+  cursor: default;
+}
+.cheers-btn .cheers-glass {
+  font-size: 18px;
+  display: inline-block;
+}
+.cheers-btn.pop .cheers-glass {
+  animation: cheersGlassPop 0.4s ease;
+}
+.cheers-btn .cheers-count {
+  font-variant-numeric: tabular-nums;
+}
+@keyframes cheersGlassPop {
+  0% { transform: scale(1) rotate(0); }
+  40% { transform: scale(1.4) rotate(-14deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* Gallery sort tabs */
+.sort-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 18px;
+}
+.sort-tabs a {
+  padding: 7px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+.sort-tabs a:hover {
+  color: var(--text);
+}
+.sort-tabs a.active {
+  background: var(--accent-grad);
+  color: #1a0d12;
+  border-color: transparent;
+}
+
+/* Tile badges */
+.tile .thumb {
+  position: relative;
+}
+.thumb-cheers,
+.thumb-badge {
+  position: absolute;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+}
+.thumb-cheers {
+  bottom: 8px;
+  left: 8px;
+  background: rgba(14, 11, 20, 0.72);
+  color: #fff;
+}
+.thumb-badge {
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 182, 94, 0.92);
+  color: #1a0d12;
+  font-size: 11px;
+}
+
 /* Respect users who prefer less motion */
 @media (prefers-reduced-motion: reduce) {
   *,

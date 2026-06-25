@@ -36,14 +36,24 @@ export async function listCocktails(): Promise<CocktailSummary[]> {
   return items
     .filter((c): c is Cocktail => Boolean(c))
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
-    .map(({ id, name, tagline, prompt, imageUrl, createdAt }) => ({
+    .map(({ id, name, tagline, prompt, imageUrl, createdAt, mocktail, cheers }) => ({
       id,
       name,
       tagline,
       prompt,
       imageUrl,
       createdAt,
+      mocktail: mocktail ?? false,
+      cheers: cheers ?? 0,
     }));
+}
+
+export async function incrementCheers(id: string): Promise<number> {
+  const cocktail = await getCocktail(id);
+  if (!cocktail) return 0;
+  cocktail.cheers = (cocktail.cheers ?? 0) + 1;
+  await cocktailStore().setJSON(id, cocktail);
+  return cocktail.cheers;
 }
 
 export async function saveImage(id: string, bytes: Buffer): Promise<void> {

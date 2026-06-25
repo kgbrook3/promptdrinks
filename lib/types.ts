@@ -13,9 +13,10 @@ export interface Cocktail {
   prepTime?: string;
   difficulty?: string;
   mocktail?: boolean;
+  cheers?: number;
 }
 
 export type CocktailSummary = Pick<
   Cocktail,
-  "id" | "name" | "tagline" | "prompt" | "imageUrl" | "createdAt"
+  "id" | "name" | "tagline" | "prompt" | "imageUrl" | "createdAt" | "mocktail" | "cheers"
 >;

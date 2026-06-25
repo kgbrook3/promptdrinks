@@ -7,12 +7,21 @@ export const metadata = {
   title: "The Cocktail Gallery",
 };
 
-export default async function Gallery() {
+export default async function Gallery({
+  searchParams,
+}: {
+  searchParams?: { sort?: string };
+}) {
   let cocktails: Awaited<ReturnType<typeof listCocktails>> = [];
   try {
     cocktails = await listCocktails();
   } catch {
     cocktails = [];
+  }
+
+  const sort = searchParams?.sort === "loved" ? "loved" : "newest";
+  if (sort === "loved") {
+    cocktails = [...cocktails].sort((a, b) => (b.cheers ?? 0) - (a.cheers ?? 0));
   }
 
   return (
@@ -23,6 +32,17 @@ export default async function Gallery() {
           {cocktails.length} drink{cocktails.length === 1 ? "" : "s"} invented
         </span>
       </div>
+
+      {cocktails.length > 0 && (
+        <div className="sort-tabs">
+          <Link className={sort === "newest" ? "active" : ""} href="/gallery">
+            Newest
+          </Link>
+          <Link className={sort === "loved" ? "active" : ""} href="/gallery?sort=loved">
+            🥂 Most loved
+          </Link>
+        </div>
+      )}
 
       {cocktails.length === 0 ? (
         <p className="empty">No cocktails yet. Head to the home page and mix the first one. 🍸</p>
@@ -37,6 +57,8 @@ export default async function Gallery() {
                 ) : (
                   <span>🍸</span>
                 )}
+                {(c.cheers ?? 0) > 0 && <span className="thumb-cheers">🥂 {c.cheers}</span>}
+                {c.mocktail && <span className="thumb-badge">Mocktail</span>}
               </div>
               <div className="tile-body">
                 <h3>{c.name}</h3>
