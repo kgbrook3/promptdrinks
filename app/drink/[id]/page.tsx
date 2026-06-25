@@ -18,19 +18,19 @@ export async function generateMetadata({
   params: { id: string };
 }): Promise<Metadata> {
   const cocktail = await getCocktail(params.id);
-  if (!cocktail) return { title: "Drink not found — PromptDrinks" };
+  if (!cocktail) return { title: "Drink not found" };
 
   const base = siteBase();
   const image = cocktail.imageUrl ? `${base}${cocktail.imageUrl}` : undefined;
-  const title = `${cocktail.name} — PromptDrinks`;
+  const ogTitle = `${cocktail.name} — PromptDrinks`;
   const description =
     cocktail.tagline || cocktail.description || `A cocktail inspired by "${cocktail.prompt}".`;
 
   return {
-    title,
+    title: cocktail.name,
     description,
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       type: "article",
       url: `${base}/drink/${cocktail.id}`,
@@ -39,7 +39,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: ogTitle,
       description,
       images: image ? [image] : [],
     },
@@ -52,13 +52,54 @@ export default async function DrinkPage({ params }: { params: { id: string } }) 
 
   const shareText = cocktail.tagline || `A cocktail inspired by "${cocktail.prompt}"`;
 
+  const recipeText = [
+    cocktail.name,
+    cocktail.tagline ? `${cocktail.tagline}\n` : "",
+    "Ingredients:",
+    ...cocktail.ingredients.map((i) => `- ${i}`),
+    "",
+    "Instructions:",
+    ...cocktail.instructions.map((s, i) => `${i + 1}. ${s}`),
+    "",
+    `Made with PromptDrinks — ${siteBase()}/drink/${cocktail.id}`,
+  ]
+    .filter((l) => l !== undefined)
+    .join("\n");
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Recipe",
+    name: cocktail.name,
+    description: cocktail.description || shareText,
+    image: cocktail.imageUrl ? [`${siteBase()}${cocktail.imageUrl}`] : undefined,
+    recipeCategory: cocktail.mocktail ? "Mocktail" : "Cocktail",
+    recipeYield: "1 drink",
+    keywords: cocktail.prompt,
+    recipeIngredient: cocktail.ingredients,
+    recipeInstructions: cocktail.instructions.map((s, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      text: s,
+    })),
+    author: { "@type": "Organization", name: "PromptDrinks" },
+  };
+
   return (
     <div className="drink-page">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Link href="/gallery" className="back-link">
         ← Back to gallery
       </Link>
       <CocktailCard cocktail={cocktail} />
-      <ShareButtons title={cocktail.name} text={shareText} />
+      <ShareButtons
+        title={cocktail.name}
+        text={shareText}
+        imageUrl={cocktail.imageUrl || undefined}
+        recipeText={recipeText}
+      />
     </div>
   );
 }

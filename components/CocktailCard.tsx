@@ -28,6 +28,7 @@ export default function CocktailCard({
         {cocktail.description && <p className="desc">{cocktail.description}</p>}
 
         <div className="meta">
+          {cocktail.mocktail && <span className="badge">Mocktail 🚫🍸</span>}
           {cocktail.glassware && (
             <span>
               <b>Glass:</b> {cocktail.glassware}
@@ -36,6 +37,16 @@ export default function CocktailCard({
           {cocktail.garnish && (
             <span>
               <b>Garnish:</b> {cocktail.garnish}
+            </span>
+          )}
+          {cocktail.prepTime && (
+            <span>
+              <b>Prep:</b> {cocktail.prepTime}
+            </span>
+          )}
+          {cocktail.difficulty && (
+            <span>
+              <b>Difficulty:</b> {cocktail.difficulty}
             </span>
           )}
         </div>

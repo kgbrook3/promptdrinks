@@ -5,12 +5,17 @@ import { useEffect, useState } from "react";
 export default function ShareButtons({
   title,
   text,
+  imageUrl,
+  recipeText,
 }: {
   title: string;
   text: string;
+  imageUrl?: string;
+  recipeText?: string;
 }) {
   const [url, setUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const [recipeCopied, setRecipeCopied] = useState(false);
   const [canNative, setCanNative] = useState(false);
 
   useEffect(() => {
@@ -34,6 +39,17 @@ export default function ShareButtons({
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard blocked */
+    }
+  }
+
+  async function copyRecipe() {
+    if (!recipeText) return;
+    try {
+      await navigator.clipboard.writeText(recipeText);
+      setRecipeCopied(true);
+      setTimeout(() => setRecipeCopied(false), 2000);
     } catch {
       /* clipboard blocked */
     }
@@ -81,6 +97,16 @@ export default function ShareButtons({
         <button type="button" onClick={copyLink} className="share-btn">
           {copied ? "Copied!" : "Copy link"}
         </button>
+        {recipeText && (
+          <button type="button" onClick={copyRecipe} className="share-btn">
+            {recipeCopied ? "Copied!" : "Copy recipe"}
+          </button>
+        )}
+        {imageUrl && (
+          <a className="share-btn" href={imageUrl} download={`${title}.png`}>
+            Download image
+          </a>
+        )}
       </div>
     </div>
   );

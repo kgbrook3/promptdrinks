@@ -10,6 +10,9 @@ export interface Cocktail {
   instructions: string[];
   imageUrl: string;
   createdAt: string;
+  prepTime?: string;
+  difficulty?: string;
+  mocktail?: boolean;
 }
 
 export type CocktailSummary = Pick<

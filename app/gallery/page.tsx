@@ -4,7 +4,7 @@ import { listCocktails } from "@/lib/store";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Gallery — PromptDrinks",
+  title: "The Cocktail Gallery",
 };
 
 export default async function Gallery() {

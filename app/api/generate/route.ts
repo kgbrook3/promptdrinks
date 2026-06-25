@@ -11,13 +11,14 @@ export const maxDuration = 60;
 // separate /api/generate-image call so neither request hits the function timeout.
 export async function POST(req: Request) {
   try {
-    const { prompt } = await req.json();
+    const { prompt, mocktail } = await req.json();
     if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
       return NextResponse.json({ error: "Please enter something." }, { status: 400 });
     }
     const cleanPrompt = prompt.trim().slice(0, 500);
+    const isMocktail = Boolean(mocktail);
 
-    const recipe = await generateRecipe(cleanPrompt);
+    const recipe = await generateRecipe(cleanPrompt, { mocktail: isMocktail });
     const id = randomUUID();
 
     const cocktail: Cocktail = {
@@ -28,6 +29,9 @@ export async function POST(req: Request) {
       description: recipe.description,
       glassware: recipe.glassware,
       garnish: recipe.garnish,
+      prepTime: recipe.prepTime,
+      difficulty: recipe.difficulty,
+      mocktail: isMocktail,
       ingredients: recipe.ingredients,
       instructions: recipe.instructions,
       imageUrl: "",

@@ -13,6 +13,8 @@ export interface GeneratedRecipe {
   description: string;
   glassware: string;
   garnish: string;
+  prepTime: string;
+  difficulty: string;
   ingredients: string[];
   instructions: string[];
   imagePrompt: string;
@@ -32,6 +34,12 @@ const COCKTAIL_TOOL = {
       },
       glassware: { type: "string", description: "The glass it is served in." },
       garnish: { type: "string", description: "The garnish." },
+      prepTime: { type: "string", description: "Approximate prep time, e.g. '3 minutes'." },
+      difficulty: {
+        type: "string",
+        enum: ["Easy", "Medium", "Hard"],
+        description: "How hard the drink is to make.",
+      },
       ingredients: {
         type: "array",
         items: { type: "string" },
@@ -54,6 +62,8 @@ const COCKTAIL_TOOL = {
       "description",
       "glassware",
       "garnish",
+      "prepTime",
+      "difficulty",
       "ingredients",
       "instructions",
       "imagePrompt",
@@ -61,9 +71,16 @@ const COCKTAIL_TOOL = {
   },
 };
 
-export async function generateRecipe(prompt: string): Promise<GeneratedRecipe> {
+export async function generateRecipe(
+  prompt: string,
+  opts: { mocktail?: boolean } = {}
+): Promise<GeneratedRecipe> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
+
+  const kind = opts.mocktail
+    ? "Invent an original NON-ALCOHOLIC mocktail (absolutely no alcohol)"
+    : "Invent an original cocktail";
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -80,7 +97,7 @@ export async function generateRecipe(prompt: string): Promise<GeneratedRecipe> {
       messages: [
         {
           role: "user",
-          content: `Invent an original cocktail that creatively captures the vibe, theme, or meaning of this input: "${prompt}". It can be alcoholic or a mocktail if that fits better. Be imaginative and make it genuinely mixable.`,
+          content: `${kind} that creatively captures the vibe, theme, or meaning of this input: "${prompt}". Be imaginative and make it genuinely mixable.`,
         },
       ],
     }),

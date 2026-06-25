@@ -9,34 +9,128 @@ import CocktailCard from "./CocktailCard";
 // A big pool of prompt ideas. The chips and typewriter pull random subsets,
 // so every visit / shuffle feels fresh.
 const IDEAS = [
+  // Places
   "a rainy Sunday in Lisbon",
-  "my first heartbreak",
-  "victory after a marathon",
-  "a haunted New Orleans jazz bar",
-  "the color teal",
-  "late-night coding session",
-  "the smell of an old bookshop",
-  "my grandmother's kitchen",
-  "a first-day-of-summer feeling",
-  "a midnight thunderstorm",
-  "winning the lottery",
   "a quiet morning in Kyoto",
-  "the last day of school",
-  "a neon-lit cyberpunk city",
   "falling in love in Paris",
-  "a cozy cabin in the snow",
-  "the taste of nostalgia",
+  "a haunted New Orleans jazz bar",
+  "a rooftop bar in Marrakech",
+  "a Venetian canal at midnight",
+  "the Amalfi coast in July",
+  "a Tokyo alley at 2am",
+  "a Scottish highland in the fog",
+  "a Havana courtyard",
+  "a Santorini sunset",
+  "a Brooklyn rooftop party",
+  "a Saharan oasis",
+  "a Bali rice terrace at dawn",
+  "a Norwegian fjord",
+  "a Provence lavender field",
+  "an Alpine chalet in winter",
+  "a New England autumn",
+  "a Pacific Northwest forest",
+  "a Tuscan vineyard at harvest",
+  "Mumbai in monsoon season",
+  "a Reykjavik winter night",
+  "a Lisbon tram at golden hour",
+  "a desert highway at night",
+  // Moods & feelings
+  "my first heartbreak",
+  "the giddy nerves of a first date",
+  "pure unfiltered joy",
+  "quiet Sunday contentment",
+  "the Sunday scaries",
+  "bittersweet goodbyes",
+  "righteous fury",
+  "restless wanderlust",
+  "cozy melancholy",
+  "triumphant relief",
+  "the calm after a storm",
+  "homesick at 3am",
+  "the thrill of a fresh start",
+  "stubborn optimism",
+  // Times & seasons
+  "a midnight thunderstorm",
+  "the first snow of the year",
+  "the last day of summer",
+  "golden hour in late August",
+  "3am insomnia",
+  "dawn after an all-nighter",
+  "a long winter night",
+  "the first warm day of spring",
+  "a harvest moon",
+  "a New Year's Eve countdown",
+  "a lazy hammock afternoon",
+  "Friday at 5pm",
+  "Monday morning",
+  // Memories & milestones
+  "my grandmother's kitchen",
+  "the last day of school",
+  "a childhood treehouse",
+  "a road trip with no destination",
+  "a wedding slow dance",
+  "your first apartment",
+  "a campfire singalong",
+  "a snow day off school",
+  "a summer at the lake",
+  "graduation night",
+  // Pop culture & fantasy
+  "a neon-lit cyberpunk city",
+  "a film noir detective",
+  "a synthwave sunset",
+  "an 8-bit video game",
+  "a smoky jazz solo",
+  "the crackle of a vinyl record",
+  "a fairy-tale forest",
+  "a dragon's treasure hoard",
+  "a pirate's buried treasure",
+  "a wizard's library",
+  "a mermaid's lagoon",
+  "a haunted mansion",
+  "a steampunk airship",
+  "a space station window",
+  "an alien jungle",
+  "a superhero's origin story",
+  "a medieval feast",
+  "a 1920s masquerade ball",
+  // Nature & elements
+  "the ocean at midnight",
+  "the northern lights",
+  "a coral reef",
+  "a redwood forest",
+  "a field of wildflowers",
+  "a frozen mountain lake",
+  "a volcano at dusk",
+  "a hidden waterfall",
+  "a foggy moor",
+  "a meadow at sunrise",
+  "a lightning storm over the sea",
+  // Senses
+  "the smell of an old bookshop",
+  "fresh rain on hot pavement",
+  "coffee at sunrise",
+  "a wood-burning fireplace",
+  "sea salt and citrus",
+  "a blooming jasmine garden",
+  "warm bread from the oven",
+  "the first sip of morning",
+  // Whimsical & abstract
+  "your favorite 90s song",
+  "the color teal",
+  "the color of your mood today",
   "a wild night in Vegas",
   "stargazing in the desert",
-  "your favorite 90s song",
-  "a dragon's treasure hoard",
-  "Friday at 5pm",
-  "a walk on a foggy beach",
   "an astronaut's first spacewalk",
   "a hidden speakeasy",
-  "a sun-drenched vineyard",
-  "the calm after a storm",
   "a carnival at dusk",
+  "a midnight diner",
+  "a midsummer night's dream",
+  "a velvet jazz lounge",
+  "a late-night coding session",
+  "the taste of nostalgia",
+  "winning the lottery",
+  "a thunderous standing ovation",
+  "a slow dance in the kitchen",
 ];
 
 // Return n unique random items from arr (Fisher–Yates partial shuffle).
@@ -83,20 +177,40 @@ export default function Generator() {
   const [cocktail, setCocktail] = useState<Cocktail | null>(null);
   const [placeholder, setPlaceholder] = useState("Type anything…");
   const [cheers, setCheers] = useState(false);
+  const [mocktail, setMocktail] = useState(false);
   // Deterministic initial slices (so server + first client render match), then
   // randomized on mount to avoid a hydration mismatch.
   const [suggestions, setSuggestions] = useState<string[]>(() => IDEAS.slice(0, 6));
   const [phrases, setPhrases] = useState<string[]>(() => IDEAS.slice(0, 8));
   const resultRef = useRef<HTMLDivElement>(null);
+  // A shuffled "deck" we deal from without replacement — no repeats until the
+  // whole pool has been shown, then it reshuffles.
+  const deckRef = useRef<string[]>([]);
+
+  // Deal n fresh chips. Refills + reshuffles when the deck runs low, keeping the
+  // just-shown items out of the next deal so nothing repeats across the seam.
+  function dealSuggestions(n: number, avoid: string[] = []): string[] {
+    if (deckRef.current.length < n) {
+      const reshuffled = sample(IDEAS, IDEAS.length);
+      const avoidSet = new Set(avoid);
+      deckRef.current = [
+        ...reshuffled.filter((x) => !avoidSet.has(x)),
+        ...reshuffled.filter((x) => avoidSet.has(x)),
+      ];
+    }
+    const picked = deckRef.current.slice(0, n);
+    deckRef.current = deckRef.current.slice(n);
+    return picked;
+  }
 
   // Randomize the chips + typewriter phrases once, on first load.
   useEffect(() => {
-    setSuggestions(sample(IDEAS, 6));
+    setSuggestions(dealSuggestions(6));
     setPhrases(sample(IDEAS, 8));
   }, []);
 
   function shuffleSuggestions() {
-    setSuggestions(sample(IDEAS, 6));
+    setSuggestions((prev) => dealSuggestions(6, prev));
   }
 
   // Smoothly scroll to the result + celebrate when a NEW drink appears.
@@ -160,7 +274,7 @@ export default function Generator() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ prompt: text }),
+        body: JSON.stringify({ prompt: text, mocktail }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Generation failed.");
@@ -302,6 +416,25 @@ export default function Generator() {
             {loading ? "Mixing…" : "Mix it"}
           </button>
         </form>
+
+        <div className="mode-toggle" role="group" aria-label="Drink type">
+          <button
+            type="button"
+            className={!mocktail ? "active" : ""}
+            onClick={() => setMocktail(false)}
+            aria-pressed={!mocktail}
+          >
+            🍸 Cocktail
+          </button>
+          <button
+            type="button"
+            className={mocktail ? "active" : ""}
+            onClick={() => setMocktail(true)}
+            aria-pressed={mocktail}
+          >
+            🧃 Mocktail
+          </button>
+        </div>
 
         <div className="suggestions">
           {suggestions.map((s) => (

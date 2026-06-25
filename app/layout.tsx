@@ -2,10 +2,32 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
 
+const SITE_URL =
+  process.env.URL || process.env.NEXT_PUBLIC_SITE_URL || "https://promptdrinks.com";
+
+const TAGLINE =
+  "Type anything — a mood, a memory, a movie, a color — and PromptDrinks invents a bespoke cocktail with its own name, photo, and recipe.";
+
 export const metadata: Metadata = {
-  title: "PromptDrinks — Type anything, get a cocktail",
-  description:
-    "Type anything and PromptDrinks invents a bespoke cocktail: name, photo, ingredients and instructions.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "PromptDrinks — Type anything, get a cocktail",
+    template: "%s — PromptDrinks",
+  },
+  description: TAGLINE,
+  applicationName: "PromptDrinks",
+  openGraph: {
+    title: "PromptDrinks — Type anything, get a cocktail",
+    description: TAGLINE,
+    url: SITE_URL,
+    siteName: "PromptDrinks",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PromptDrinks — Type anything, get a cocktail",
+    description: TAGLINE,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

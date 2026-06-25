@@ -484,6 +484,40 @@ main {
   color: var(--text);
   font-weight: 600;
 }
+.meta .badge {
+  background: rgba(255, 182, 94, 0.16);
+  border: 1px solid rgba(255, 182, 94, 0.5);
+  color: var(--accent-2);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-weight: 700;
+}
+
+/* Cocktail / Mocktail toggle */
+.mode-toggle {
+  display: inline-flex;
+  margin: 18px auto 0;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px;
+  gap: 4px;
+}
+.mode-toggle button {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.mode-toggle button.active {
+  background: var(--accent-grad);
+  color: #1a0d12;
+}
 .cocktail h3 {
   font-size: 13px;
   text-transform: uppercase;
