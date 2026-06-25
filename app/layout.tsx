@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
+
+// Applies the saved (or system) theme before paint to avoid a flash.
+const themeScript = `(function(){try{var t=localStorage.getItem('pd-theme');if(!t){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.dataset.theme=t;}catch(e){}})();`;
 
 const SITE_URL =
   process.env.URL || process.env.NEXT_PUBLIC_SITE_URL || "https://promptdrinks.com";
@@ -32,8 +36,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <header className="site-header">
           <Link href="/" className="logo">
             Prompt<span>Drinks</span>
@@ -41,6 +46,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <nav>
             <Link href="/">Mix</Link>
             <Link href="/gallery">Gallery</Link>
+            <Link href="/stats">Stats</Link>
+            <ThemeToggle />
           </nav>
         </header>
         <main>{children}</main>
