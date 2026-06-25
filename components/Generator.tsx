@@ -167,28 +167,71 @@ export default function Generator() {
       setCocktail(data);
       setLoading(false);
 
-      // Step 2: generate the image separately so this never times out.
+      // Step 2: generate the image out-of-band so this never times out.
       if (data.id && data.imagePrompt) {
-        setImageLoading(true);
-        try {
-          const imgRes = await fetch("/api/generate-image", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ id: data.id, imagePrompt: data.imagePrompt }),
-          });
-          const imgData = await imgRes.json();
-          if (imgRes.ok && imgData.imageUrl) {
-            setCocktail((prev) => (prev ? { ...prev, imageUrl: imgData.imageUrl } : prev));
-          }
-        } catch {
-          // Leave the placeholder if the image step fails; recipe still stands.
-        } finally {
-          setImageLoading(false);
-        }
+        generateImageFor(data.id, data.imagePrompt);
       }
     } catch (err: any) {
       setError(err?.message || "Something went wrong. Try again.");
       setLoading(false);
+    }
+  }
+
+  // Kicks off the high-quality image: tries the no-timeout background function
+  // and polls for the result; falls back to the synchronous route (e.g. local dev).
+  async function generateImageFor(id: string, imagePrompt: string) {
+    setImageLoading(true);
+    try {
+      let background = false;
+      try {
+        const bg = await fetch("/.netlify/functions/generate-image-background", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ id, imagePrompt }),
+        });
+        background = bg.status === 202 || bg.ok;
+      } catch {
+        background = false;
+      }
+
+      if (background) {
+        // Poll the image route until the photo exists (up to ~2 min).
+        for (let i = 0; i < 48; i++) {
+          await new Promise((r) => setTimeout(r, 2500));
+          try {
+            const probe = await fetch(`/api/image/${id}`, {
+              method: "HEAD",
+              cache: "no-store",
+            });
+            if (probe.ok) {
+              setCocktail((prev) =>
+                prev && prev.id === id ? { ...prev, imageUrl: `/api/image/${id}` } : prev
+              );
+              return;
+            }
+          } catch {
+            /* keep polling */
+          }
+        }
+        return; // gave up; recipe still stands with the placeholder
+      }
+
+      // Fallback: synchronous endpoint.
+      const imgRes = await fetch("/api/generate-image", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id, imagePrompt }),
+      });
+      const imgData = await imgRes.json();
+      if (imgRes.ok && imgData.imageUrl) {
+        setCocktail((prev) =>
+          prev && prev.id === id ? { ...prev, imageUrl: imgData.imageUrl } : prev
+        );
+      }
+    } catch {
+      /* leave placeholder; recipe still stands */
+    } finally {
+      setImageLoading(false);
     }
   }
 

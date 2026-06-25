@@ -1,6 +1,9 @@
 [build]
   command = "npm run build"
 
+[functions]
+  directory = "netlify/functions"
+
 # The Next.js runtime sets the publish directory itself — do NOT hard-set `publish`.
 # Netlify installs the current @netlify/plugin-nextjs automatically when it detects Next.js.
 [[plugins]]

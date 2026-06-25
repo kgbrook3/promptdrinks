@@ -3,8 +3,9 @@
 const CLAUDE_MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-4-6";
 const IMAGE_MODEL = process.env.IMAGE_MODEL || "gpt-image-1";
 const IMAGE_SIZE = process.env.IMAGE_SIZE || "1024x1024";
-// "low" keeps gpt-image-1 fast enough to finish inside the serverless timeout.
-const IMAGE_QUALITY = process.env.IMAGE_QUALITY || "low";
+// Image generation runs in a background function (no timeout), so we can afford
+// high quality. Override with IMAGE_QUALITY (low|medium|high) if desired.
+const IMAGE_QUALITY = process.env.IMAGE_QUALITY || "high";
 
 export interface GeneratedRecipe {
   name: string;
@@ -96,6 +97,18 @@ export async function generateRecipe(prompt: string): Promise<GeneratedRecipe> {
   return toolUse.input as GeneratedRecipe;
 }
 
+// Shared art-direction wrapper for sharper, more professional-looking results.
+export function buildImagePrompt(imagePrompt: string): string {
+  return (
+    `Professional, photorealistic cocktail photography for a high-end cocktail menu. ` +
+    `${imagePrompt}. The drink is the clear hero, centered in appropriate glassware ` +
+    `with realistic ice, condensation, and a fresh garnish. Moody upscale bar setting ` +
+    `softly blurred behind it, warm cinematic lighting, shallow depth of field as if shot ` +
+    `on a 50mm lens, crisp focus on the glass, rich saturated color, subtle reflections and ` +
+    `highlights. No text, no logos, no watermarks, no hands or people.`
+  );
+}
+
 // Generates an image and returns raw PNG bytes.
 export async function generateImage(imagePrompt: string): Promise<Buffer> {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -109,7 +122,7 @@ export async function generateImage(imagePrompt: string): Promise<Buffer> {
     },
     body: JSON.stringify({
       model: IMAGE_MODEL,
-      prompt: `Professional, appetizing cocktail photography. ${imagePrompt}. Soft studio lighting, shallow depth of field, no text or watermarks.`,
+      prompt: buildImagePrompt(imagePrompt),
       size: IMAGE_SIZE,
       n: 1,
       // gpt-image-1 supports low|medium|high; dall-e-3 uses standard|hd, so only
