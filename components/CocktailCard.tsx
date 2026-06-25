@@ -1,4 +1,5 @@
 import type { Cocktail } from "@/lib/types";
+import { cdnImage } from "@/lib/img";
 
 export default function CocktailCard({
   cocktail,
@@ -12,7 +13,11 @@ export default function CocktailCard({
       <div className="photo">
         {cocktail.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={cocktail.imageUrl} alt={cocktail.name} />
+          <img
+            src={cdnImage(cocktail.imageUrl, { w: 800, q: 80 })}
+            alt={cocktail.name}
+            decoding="async"
+          />
         ) : imageLoading ? (
           <div className="photo-loading">
             <span className="shaker">🍸</span>

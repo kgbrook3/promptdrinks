@@ -27,14 +27,28 @@ export async function updateCocktailImage(id: string, imageUrl: string): Promise
   await cocktailStore().setJSON(id, cocktail);
 }
 
+// How long an imageless drink is kept before it's treated as a failed
+// generation and pruned. Newer ones may still be mid-generation.
+const IMAGELESS_TTL_MS = 10 * 60 * 1000;
+
 export async function listCocktails(): Promise<CocktailSummary[]> {
   const store = cocktailStore();
   const { blobs } = await store.list();
   const items = await Promise.all(
     blobs.map(async (b) => (await store.get(b.key, { type: "json" })) as Cocktail | null)
   );
-  return items
-    .filter((c): c is Cocktail => Boolean(c))
+  const all = items.filter((c): c is Cocktail => Boolean(c));
+
+  // Prune stale imageless drinks (failed generations) from storage.
+  const now = Date.now();
+  await Promise.all(
+    all
+      .filter((c) => !c.imageUrl && now - new Date(c.createdAt).getTime() > IMAGELESS_TTL_MS)
+      .map((c) => store.delete(c.id))
+  );
+
+  return all
+    .filter((c) => Boolean(c.imageUrl)) // only show drinks that have an image
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
     .map(({ id, name, tagline, prompt, imageUrl, createdAt, mocktail, cheers }) => ({
       id,

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
@@ -11,6 +11,12 @@ const SITE_URL =
 
 const TAGLINE =
   "Type anything — a mood, a memory, a movie, a color — and PromptDrinks invents a bespoke cocktail with its own name, photo, and recipe.";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0e0b14",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

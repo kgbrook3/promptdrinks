@@ -2,6 +2,7 @@ import Link from "next/link";
 import Generator from "@/components/Generator";
 import { listCocktails } from "@/lib/store";
 import type { CocktailSummary } from "@/lib/types";
+import { cdnImage } from "@/lib/img";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,12 @@ function Tile({ c }: { c: CocktailSummary }) {
       <div className="thumb">
         {c.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={c.imageUrl} alt={c.name} />
+          <img
+            src={cdnImage(c.imageUrl, { w: 400, h: 400 })}
+            alt={c.name}
+            loading="lazy"
+            decoding="async"
+          />
         ) : (
           <span>🍸</span>
         )}

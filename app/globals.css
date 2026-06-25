@@ -45,6 +45,10 @@ a {
   text-decoration: none;
 }
 
+img {
+  max-width: 100%;
+}
+
 .site-header {
   display: flex;
   align-items: center;
@@ -563,6 +567,77 @@ main {
 .loved-list .loved-count {
   color: var(--muted);
   font-size: 13px;
+}
+
+/* ---------------- Mobile ---------------- */
+@media (max-width: 640px) {
+  .site-header {
+    padding: 13px 16px;
+  }
+  .site-header nav {
+    gap: 15px;
+    font-size: 14px;
+  }
+  .logo {
+    font-size: 20px;
+  }
+  main {
+    padding: 0 16px;
+  }
+  .hero {
+    padding: 44px 0 28px;
+  }
+  .section-head {
+    margin: 34px 0 14px;
+  }
+  .section-head h2 {
+    font-size: 21px;
+  }
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  .cocktail {
+    margin: 26px auto;
+  }
+  .cocktail .photo {
+    min-height: 250px;
+  }
+  .cocktail .body {
+    padding: 22px;
+  }
+  .gallery-controls {
+    gap: 10px;
+  }
+  .share-btns {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  .site-header {
+    padding: 12px 14px;
+  }
+  .site-header nav {
+    gap: 12px;
+  }
+  .logo {
+    font-size: 18px;
+  }
+  .prompt-form {
+    flex-direction: column;
+    padding: 8px;
+  }
+  .prompt-form input {
+    width: 100%;
+  }
+  .prompt-form button {
+    width: 100%;
+    padding: 13px;
+  }
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* Respect users who prefer less motion */
