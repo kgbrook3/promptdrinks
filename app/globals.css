@@ -323,24 +323,64 @@ main {
   100% { transform: scale(1) rotate(0); }
 }
 
-/* Gallery sort tabs */
+/* Gallery search + tabs */
+.gallery-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.gallery-search {
+  flex: 1 1 240px;
+  min-width: 200px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 16px;
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
+}
+.gallery-search::placeholder {
+  color: var(--muted);
+}
+.gallery-search:focus {
+  border-color: var(--accent);
+}
+.results-count {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 16px;
+}
+
 .sort-tabs {
   display: flex;
   gap: 8px;
   margin: 0 0 18px;
+  flex-wrap: wrap;
 }
-.sort-tabs a {
+.gallery-controls .sort-tabs {
+  margin: 0;
+}
+.sort-tabs a,
+.sort-tabs button {
   padding: 7px 15px;
   border-radius: 999px;
   border: 1px solid var(--border);
   color: var(--muted);
   font-size: 14px;
   font-weight: 600;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
 }
-.sort-tabs a:hover {
+.sort-tabs a:hover,
+.sort-tabs button:hover {
   color: var(--text);
 }
-.sort-tabs a.active {
+.sort-tabs a.active,
+.sort-tabs button.active {
   background: var(--accent-grad);
   color: #1a0d12;
   border-color: transparent;
