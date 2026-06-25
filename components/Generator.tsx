@@ -6,14 +6,48 @@ import Link from "next/link";
 import type { Cocktail } from "@/lib/types";
 import CocktailCard from "./CocktailCard";
 
-const SUGGESTIONS = [
+// A big pool of prompt ideas. The chips and typewriter pull random subsets,
+// so every visit / shuffle feels fresh.
+const IDEAS = [
   "a rainy Sunday in Lisbon",
   "my first heartbreak",
   "victory after a marathon",
   "a haunted New Orleans jazz bar",
   "the color teal",
   "late-night coding session",
+  "the smell of an old bookshop",
+  "my grandmother's kitchen",
+  "a first-day-of-summer feeling",
+  "a midnight thunderstorm",
+  "winning the lottery",
+  "a quiet morning in Kyoto",
+  "the last day of school",
+  "a neon-lit cyberpunk city",
+  "falling in love in Paris",
+  "a cozy cabin in the snow",
+  "the taste of nostalgia",
+  "a wild night in Vegas",
+  "stargazing in the desert",
+  "your favorite 90s song",
+  "a dragon's treasure hoard",
+  "Friday at 5pm",
+  "a walk on a foggy beach",
+  "an astronaut's first spacewalk",
+  "a hidden speakeasy",
+  "a sun-drenched vineyard",
+  "the calm after a storm",
+  "a carnival at dusk",
 ];
+
+// Return n unique random items from arr (Fisher–Yates partial shuffle).
+function sample<T>(arr: T[], n: number): T[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy.slice(0, n);
+}
 
 // Decorative rising bubbles for the hero (left %, size px, delay s, duration s).
 const BUBBLES = [
@@ -25,17 +59,6 @@ const BUBBLES = [
   { left: 66, size: 10, delay: 2, dur: 9.5 },
   { left: 78, size: 18, delay: 1.4, dur: 8.5 },
   { left: 90, size: 8, delay: 3, dur: 11.5 },
-];
-
-// Phrases the input placeholder types out, one after another.
-const PLACEHOLDERS = [
-  "a rainy Sunday in Lisbon",
-  "the smell of an old bookshop",
-  "victory after a marathon",
-  "a haunted New Orleans jazz bar",
-  "the color teal",
-  "my grandmother's kitchen",
-  "a first-day-of-summer feeling",
 ];
 
 // Pre-computed "cheers" sparkle burst particles (direction + glyph).
@@ -60,7 +83,21 @@ export default function Generator() {
   const [cocktail, setCocktail] = useState<Cocktail | null>(null);
   const [placeholder, setPlaceholder] = useState("Type anything…");
   const [cheers, setCheers] = useState(false);
+  // Deterministic initial slices (so server + first client render match), then
+  // randomized on mount to avoid a hydration mismatch.
+  const [suggestions, setSuggestions] = useState<string[]>(() => IDEAS.slice(0, 6));
+  const [phrases, setPhrases] = useState<string[]>(() => IDEAS.slice(0, 8));
   const resultRef = useRef<HTMLDivElement>(null);
+
+  // Randomize the chips + typewriter phrases once, on first load.
+  useEffect(() => {
+    setSuggestions(sample(IDEAS, 6));
+    setPhrases(sample(IDEAS, 8));
+  }, []);
+
+  function shuffleSuggestions() {
+    setSuggestions(sample(IDEAS, 6));
+  }
 
   // Smoothly scroll to the result + celebrate when a NEW drink appears.
   useEffect(() => {
@@ -78,14 +115,14 @@ export default function Generator() {
 
   // Typewriter placeholder that cycles through example prompts while empty.
   useEffect(() => {
-    if (prompt) return; // pause once the user starts typing
+    if (prompt || phrases.length === 0) return; // pause once the user types
     let phraseIdx = 0;
     let charIdx = 0;
     let deleting = false;
     let timer: ReturnType<typeof setTimeout>;
 
     const tick = () => {
-      const phrase = PLACEHOLDERS[phraseIdx];
+      const phrase = phrases[phraseIdx];
       if (!deleting) {
         charIdx++;
         setPlaceholder(`Try: ${phrase.slice(0, charIdx)}`);
@@ -100,7 +137,7 @@ export default function Generator() {
         setPlaceholder(`Try: ${phrase.slice(0, charIdx)}`);
         if (charIdx === 0) {
           deleting = false;
-          phraseIdx = (phraseIdx + 1) % PLACEHOLDERS.length;
+          phraseIdx = (phraseIdx + 1) % phrases.length;
           timer = setTimeout(tick, 350);
           return;
         }
@@ -110,7 +147,7 @@ export default function Generator() {
 
     timer = setTimeout(tick, 700);
     return () => clearTimeout(timer);
-  }, [prompt]);
+  }, [prompt, phrases]);
 
   async function generate(value: string) {
     const text = value.trim();
@@ -224,7 +261,7 @@ export default function Generator() {
         </form>
 
         <div className="suggestions">
-          {SUGGESTIONS.map((s) => (
+          {suggestions.map((s) => (
             <button
               key={s}
               type="button"
@@ -237,6 +274,15 @@ export default function Generator() {
               {s}
             </button>
           ))}
+          <button
+            type="button"
+            className="shuffle-chip"
+            disabled={loading}
+            onClick={shuffleSuggestions}
+            aria-label="Shuffle ideas"
+          >
+            ↻ Shuffle
+          </button>
         </div>
 
         {error && <div className="error">{error}</div>}
