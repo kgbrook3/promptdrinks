@@ -1,0 +1,16 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PromptDrinks — coupe with garnish">
+  <defs>
+    <linearGradient id="a3" x1="8" y1="8" x2="40" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff5e8a" />
+      <stop offset="1" stop-color="#ffb65e" />
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#a3)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11 15h26" />
+    <path d="M11 15Q24 28 37 15" />
+    <path d="M24 21.5v16.5" />
+    <path d="M17 39h14" />
+  </g>
+  <path d="M19.5 18 L30 7" fill="none" stroke="url(#a3)" stroke-width="2" stroke-linecap="round" />
+  <circle cx="31" cy="6" r="2.7" fill="url(#a3)" />
+</svg>

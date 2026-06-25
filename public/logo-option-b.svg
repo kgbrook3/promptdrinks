@@ -1,0 +1,17 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PromptDrinks — chat bubble">
+  <defs>
+    <linearGradient id="b" x1="8" y1="8" x2="40" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff5e8a" />
+      <stop offset="1" stop-color="#ffb65e" />
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#b)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="7" y="9" width="34" height="26" rx="8" />
+    <path d="M16 35 L13 41 L22 35" />
+  </g>
+  <g fill="none" stroke="url(#b)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17 16h14L24 24Z" />
+    <path d="M24 24v5" />
+    <path d="M20.5 30h7" />
+  </g>
+</svg>
